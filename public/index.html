@@ -44,9 +44,14 @@
             </button>
           </li>
           <li>
-            <button class="btn waves-effect waves-light" id="loginBtn" >
+            <a href="signup.html">
+              Signup
+            </a>
+          </li>
+          <li>
+            <a id="loginBtn" href="login.html">
               Login
-            </button>
+            </a>
           </li>
         </ul>
        
@@ -99,103 +104,102 @@
     </div>
 
     <script type="module">
-      import { signIn, logout, auth, setAuthListeners } from './auth.js';
-      import { getBooks, getReviews, createReview, deleteReview } from './data.js';
+    import { signIn, logout, auth, setAuthListeners } from './auth.js';
+    import { getBooks, getReviews, createReview, deleteReview } from './data.js';
 
-      let loginBtn = document.querySelector('#loginBtn');
-      let logoutBtn = document.querySelector('#logoutBtn');
-      let reviewForm = document.querySelector('#reviewForm');
+    let loginBtn = document.querySelector('#loginBtn');
+    let logoutBtn = document.querySelector('#logoutBtn');
+    let reviewForm = document.querySelector('#reviewForm');
 
-      function setLoggedInUI(){
-          M.toast({html: 'Logged In!'})
-          document.querySelector('#user').innerHTML = `Signed in Anonymously`;
-          document.querySelector('#loginBtn').style.display = 'none';
-          document.querySelector('#logoutBtn').style.display = 'inline-block';
-      }
-
-      function setLoggedOutUI(){
-          M.toast({html: 'Logged Out!'})
-          document.querySelector('#user').innerHTML = '';
-          document.querySelector('#loginBtn').style.display = 'inline-block';
-          document.querySelector('#logoutBtn').style.display = 'none';
-      }
-
-      //attatch listeners
-      logoutBtn.addEventListener('click', logout);
-      loginBtn.addEventListener('click', signIn);
-      setAuthListeners(setLoggedInUI, setLoggedOutUI);
-
-      function renderReviews(reviews){
-        let reviewsList = document.querySelector('#reviews');
-        let html = '';
-        for (let review of reviews){
-            html += `
-                <li class="collection-item">
-                    <p>Review: ${review.text}</p>
-                    <p>Reviewer: ${review.reviewer}</p>
-                </li>`;
-        }
-        reviewsList.innerHTML = html;
-      }
-
-      function selectBook(isbn, name){
-          document.querySelector('#selectedName').innerHTML = name;
-          let selectedBook = document.querySelector('#selectedBook');
-          selectedBook.value = isbn;
-          getReviews(isbn, renderReviews);
-      }
-
-      window.selectBook = selectBook;
-
-reviewForm.addEventListener('submit', submitReivew);
-
-async function submitReivew(event){
-    event.preventDefault();
-    let form = event.target;
-    let formData = new FormData(form);
-    const { text, isbn } = Object.fromEntries(formData);
-    if(isbn === 'null'){
-        alert('Please select a book to review');
+    function setLoggedInUI(){
+        M.toast({html: 'Logged In!'})
+        document.querySelector('#user').innerHTML = `Signed as ${auth.currentUser.email}`;
+        document.querySelector('#loginBtn').style.display = 'none';
+        document.querySelector('#logoutBtn').style.display = 'inline-block';
     }
-    else if(auth.currentUser === null){
-        alert('Please login to review');
-    }else{
-      await createReview(auth, isbn, text);
-      M.toast({html: 'Review created!'});
-      form.reset();
-      getReviews(isbn, renderReviews);
+
+    function setLoggedOutUI(){
+        M.toast({html: 'Logged Out!'})
+        document.querySelector('#user').innerHTML = '';
+        document.querySelector('#loginBtn').style.display = 'inline-block';
+        document.querySelector('#logoutBtn').style.display = 'none';
     }
-}
 
-      function renderBooks(books)
-      {
-        let booksArea = document.querySelector('#books');
-        let html = '';
-        for (let book of books){
-            html += `
-                <div class="col offset-s1 s10 m6 l4">
-                    <div class="card purple lighten-5">
-                        <div>
-                            <img src="${book.image}"  style="max-width:100%">
-                        </div>
-                        <div class="card-content">
-                            <span class="card-title">${book.title}</span>
-                            <p>${book.author}</p>
-                            <p>${book.year}</p>
-                            <p>${book.publisher}</p>
-                        </div>
-                    <div class="card-action">
-                      <button class="btn waves-effect" onclick="selectBook('${book.isbn}', '${book.title}')">
-                        Review
-                      </button>
-                    </div>
-                    </div>
-                </div>`;
-        }
-        booksArea.innerHTML = html;
+    //attatch listeners
+    logoutBtn.addEventListener('click', logout);
+    setAuthListeners(setLoggedInUI, setLoggedOutUI);
+
+    function renderReviews(reviews){
+      let reviewsList = document.querySelector('#reviews');
+      let html = '';
+      for (let review of reviews){
+          html += `
+              <li class="collection-item">
+                  <p>Review: ${review.text}</p>
+                  <p>Reviewer: ${review.reviewer}</p>
+              </li>`;
       }
+      reviewsList.innerHTML = html;
+    }
 
-      getBooks(renderBooks);
+    function selectBook(isbn, name){
+        document.querySelector('#selectedName').innerHTML = name;
+        let selectedBook = document.querySelector('#selectedBook');
+        selectedBook.value = isbn;
+        getReviews(isbn, renderReviews);
+    }
+
+    window.selectBook = selectBook;
+
+    reviewForm.addEventListener('submit', submitReivew);
+
+    async function submitReivew(event){
+      event.preventDefault();
+      let form = event.target;
+      let formData = new FormData(form);
+      const { text, isbn } = Object.fromEntries(formData);
+      if(isbn === 'null'){
+          alert('Please select a book to review');
+      }
+      else if(auth.currentUser === null){
+          alert('Please login to review');
+      }else{
+        await createReview(auth, isbn, text);
+        M.toast({html: 'Review created!'});
+        form.reset();
+        getReviews(isbn, renderReviews);
+      }
+  }
+
+    function renderBooks(books)
+    {
+      let booksArea = document.querySelector('#books');
+      let html = '';
+      for (let book of books){
+          html += `
+              <div class="col offset-s1 s10 m6 l4">
+                  <div class="card purple lighten-5">
+                      <div>
+                          <img src="${book.image}"  style="max-width:100%">
+                      </div>
+                      <div class="card-content">
+                          <span class="card-title">${book.title}</span>
+                          <p>${book.author}</p>
+                          <p>${book.year}</p>
+                          <p>${book.publisher}</p>
+                      </div>
+                  <div class="card-action">
+                    <button class="btn waves-effect" onclick="selectBook('${book.isbn}', '${book.title}')">
+                      Review
+                    </button>
+                  </div>
+                  </div>
+              </div>`;
+      }
+      booksArea.innerHTML = html;
+    }
+
+    getBooks(renderBooks);
       
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>

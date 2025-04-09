@@ -3,12 +3,13 @@ import {
   getAuth, 
   signOut, 
   signInAnonymously, 
-  setPersistence, 
+  setPersistence,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword, 
   browserLocalPersistence, 
   onAuthStateChanged 
 } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 import firebaseConfig from "./firebaseConfig.js";
-
 
 const app = initializeApp(firebaseConfig);
 
@@ -41,4 +42,19 @@ async function logout() {
   }
 }
 
-export {auth, setAuthListeners, signIn, logout};
+async function login(email, password){
+  try{
+    await setPersistence(auth, browserLocalPersistence);
+    const user = await signInWithEmailAndPassword(auth, email, password);
+    return user;
+  }catch(e){
+    console.error(e);
+    return null;
+  }
+}
+
+async function createUser(email, password){
+  return createUserWithEmailAndPassword(auth, email, password);
+}
+
+export {auth, setAuthListeners, signIn, login, logout, createUser};

@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-import { getFirestore, collection, getDoc, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+import { getFirestore, collection, getDoc, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 import firebaseConfig from "./firebaseConfig.js";
 
 
@@ -8,7 +8,7 @@ const db = getFirestore(app);
 
 
 async function getBooks(renderFun){
-    let response = await fetch('/books.json');
+    let response = await fetch('./books.json');
     let books = await response.json();
     renderFun(books);
 }
@@ -17,11 +17,17 @@ async function getReviews(isbn, renderFun){
     const reviewsRef = collection(db, 'reviews');
     const querySnapshot = await getDocs(reviewsRef);
     const reviews = [];
-    querySnapshot.forEach((doc) => {
-        if (doc.data().isbn === isbn) {
-            reviews.push(doc.data());
+
+    querySnapshot.forEach((docSnap) => {
+        
+        if (docSnap.data().isbn === isbn) {
+            reviews.push({
+                id: docSnap.id,
+                ...docSnap.data()
+            });
         }
     });
+    console.log(isbn);
     renderFun(reviews);
 }
 
@@ -35,16 +41,23 @@ async function createReview(auth, isbn, text){
     addDoc(collection(db, "reviews"), reviewData)
 }
 
-async function deleteReview(auth, reviewId){
+async function deleteReview(authen, reviewId){
     const reviewRef = doc(db, 'reviews', reviewId);
+    console.log(reviewRef);
     const reviewDoc = await getDoc(reviewRef);
-    
-    if (reviewDoc.exists() && reviewDoc.data().userId === auth.currentUser.uid) {
+    //console.log(reviewDoc);
+    // console.log(doc);
+    if (reviewDoc.exists()) {
         await deleteDoc(reviewRef);
         console.log("Review deleted successfully");
         return true;
-    } else {
-        console.log("Review not found or you don't have permission to delete it");
+    } //else if(reviewDoc.exists()){
+    //     console.log("Review not found or you don't have permission to delete it");
+    //     M.toast({html: "you don't have permission to delete it"});
+    //     return false;
+    // } 
+        else{
+        M.toast({html: "Review not found"});
         return false;
     }
 }

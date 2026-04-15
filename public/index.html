@@ -1,5 +1,5 @@
 
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
 
@@ -128,16 +128,45 @@
       function renderReviews(reviews){
         let reviewsList = document.querySelector('#reviews');
         let html = '';
+        console.log(reviews);
+        console.log(auth);
         for (let review of reviews){
+          if (review.userId === auth.currentUser.uid){
             html += `
                 <li class="collection-item">
                     <p>Review: ${review.text}</p>
                     <p>Reviewer: ${review.reviewer}</p>
+                    <button class="btn-small red waves-effect" onclick="deleteReviewWrapper('${review.id}', '${review.isbn}')">
+                      Delete
+                    </button>
                 </li>`;
+            }
+            else{
+              html += `
+                <li class="collection-item">
+                    <p>Review: ${review.text}</p>
+                    <p>Reviewer: ${review.reviewer}</p>
+
+                </li>`;
+            }
         }
         reviewsList.innerHTML = html;
       }
 
+
+async function deleteReviewWrapper(reviewId, isbn){
+   if(auth.currentUser === null){
+        alert('Please login to delete');
+    }else{ 
+      if(confirm('Are you sure you want to delete this review?')){
+        await deleteReview(auth, reviewId);
+        M.toast({html: 'Review deleted!'});
+        getReviews(isbn, renderReviews);
+      }
+      
+    }
+}
+window.deleteReviewWrapper = deleteReviewWrapper;
       function selectBook(isbn, name){
           document.querySelector('#selectedName').innerHTML = name;
           let selectedBook = document.querySelector('#selectedBook');

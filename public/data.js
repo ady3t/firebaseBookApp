@@ -43,19 +43,15 @@ async function createReview(auth, isbn, text){
 
 async function deleteReview(authen, reviewId){
     const reviewRef = doc(db, 'reviews', reviewId);
-    console.log(reviewRef);
+    //console.log(reviewRef);
     const reviewDoc = await getDoc(reviewRef);
     //console.log(reviewDoc);
     // console.log(doc);
-    if (reviewDoc.exists()) {
+    if (reviewDoc.exists() && reviewDoc.data().userId === authen.currentUser.uid) {
         await deleteDoc(reviewRef);
         console.log("Review deleted successfully");
         return true;
-    } //else if(reviewDoc.exists()){
-    //     console.log("Review not found or you don't have permission to delete it");
-    //     M.toast({html: "you don't have permission to delete it"});
-    //     return false;
-    // } 
+    } 
         else{
         M.toast({html: "Review not found"});
         return false;

@@ -128,8 +128,6 @@
       function renderReviews(reviews){
         let reviewsList = document.querySelector('#reviews');
         let html = '';
-        console.log(reviews);
-        console.log(auth);
         for (let review of reviews){
           if (review.userId === auth.currentUser.uid){
             html += `
